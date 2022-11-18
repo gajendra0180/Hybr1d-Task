@@ -1,0 +1,19 @@
+{
+  "name": "hybr1d-task",
+  "version": "1.0.0",
+  "description": "Build a REST API for an e-commerce marketpla",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gajendra0180/Hybr1d-Task.git"
+  },
+  "author": "Gajendra Pal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gajendra0180/Hybr1d-Task/issues"
+  },
+  "homepage": "https://github.com/gajendra0180/Hybr1d-Task#readme"
+}
