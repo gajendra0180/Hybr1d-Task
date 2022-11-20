@@ -16,7 +16,7 @@
 
 ---
 
-<p align="center"> Few lines describing your project.
+<p align="center"> REST APIs for an e-commerce marketplace.
     <br> 
 </p>
 
