@@ -1,3 +1,5 @@
+const models = require('../../models')
+
 module.exports = {
     async getOrders(req, res) {
         try {
@@ -53,7 +55,7 @@ module.exports = {
             }).then(async (seller) => {
                 if (seller) {
                     items.forEach(async (item_uuid) => {
-                        const item = await Product.findOne({
+                        const item = await models.Product.findOne({
                             where: {
                                 uuid: item_uuid
                             },
@@ -72,6 +74,27 @@ module.exports = {
                     res.send({ code: 400, message: 'Seller not found' });
                 }
             })
+        }
+        catch (err) {
+            res.send({ code: 500, message: err.message })
+        }
+    },
+    async addProduct(req, res) {
+        try {
+            const productAlreadyExists = await models.Product.findOne({
+                where: {
+                    name: req.body.name,
+                    price: req.body.price
+                },
+                raw: true
+            })
+            if (productAlreadyExists)
+                res.send({ code: 500, message: "Product Already Exists" })
+            const product = await models.Product.create({
+                name: req.body.name,
+                price: req.body.price
+            })
+            res.send({ code: 200, product })
         }
         catch (err) {
             res.send({ code: 500, message: err.message })

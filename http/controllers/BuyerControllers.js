@@ -1,3 +1,6 @@
+const { User } = require('../../models');
+const models = require('../../models')
+
 module.exports = {
     async GetSellers(req, res) {
         try {
@@ -5,7 +8,8 @@ module.exports = {
                 where: {
                     user_type: 'seller'
                 },
-                raw: true
+                raw: true,
+                attributes: ['username', 'user_type']
             })
             res.send({ code: 200, sellers });
         }
@@ -15,20 +19,35 @@ module.exports = {
     },
     async getCatalog(req, res) {
         try {
-            const seller_id = req.params.seller_id;
-            const catalog = await models.Catalog.findAll({
+            // accepts the seller uuid
+            let seller_id = await User.findOne({
                 where: {
-                    seller_id: seller_id
+                    uuid: req.params.seller_id,
+                    user_type: 'seller'
                 },
+                attributes: ['id'],
                 raw: true
             })
-            const productList = await models.Product.findAll({
-                where: {
-                    id: catalog.map((item) => item.product_id)
-                },
-                raw: true
-            })
-            res.send({ code: 200, productList });
+            seller_id = seller_id.id;
+            if (seller_id) {
+                const catalog = await models.Catalog.findAll({
+                    where: {
+                        seller_id: seller_id
+                    },
+                    raw: true
+                })
+                const productList = await models.Product.findAll({
+                    where: {
+                        id: catalog.map((item) => item.product_id)
+                    },
+                    raw: true
+                })
+                res.send({ code: 200, productList });
+            }
+            else {
+                res.send({ code: 500, message: "Seller Does not exists" })
+            }
+
         }
         catch (err) {
             res.send({ code: 500, message: err.message })
@@ -36,45 +55,76 @@ module.exports = {
     },
     async createOrder(req, res) {
         try {
-            const seller_id = req.params.seller_id;
-            const buyer_user_name = req.body.user_name;
-            // Items will be the array of uuid column of the catalog table
-            const items = req.body.items;
-            const products = await Product.findAll({
+            // Accpeta a seller uuid and a list of products with the uuid of the catalog table
+            let seller_id = await User.findOne({
                 where: {
-                    uuid: items.map((item) => item.uuid)
+                    uuid: req.params.seller_id,
+                    user_type: 'seller'
                 },
+                attributes: ['id'],
                 raw: true
             })
-            let total_price = 0;
-            products.map((product) => {
-                total_price += product.price
-            })
-            models.User.findOne({
-                where: {
-                    username: buyer_user_name,
-                    user_type: 'buyer'
-                },
-                raw: true
-            }).then(async (buyer) => {
-                if (buyer) {
-                    const order = await models.Order.create({
-                        buyer_id: buyer.id,
-                        seller_id: seller_id,
-                        price: total_price
-                    })
-                    products.forEach(async (item) => {
-                        await models.OrderItem.create({
-                            order_id: order.id,
-                            product_id: item.id
-                        })
-                    })
-                    res.send({ code: 200, message: 'Order created' });
-                }
-                else {
-                    res.send({ code: 400, message: 'Buyer not found' });
-                }
-            })
+            console.log(seller_id)
+            seller_id = seller_id.id;
+            if (seller_id) {
+                const buyer_user_uuid = req.body.buyer;
+                // Items will be the uuid column of the catalog table for the products of seller with the current seller id
+                const items = req.body.items;
+                console.log(items)
+                const catalog_products = await models.Catalog.findAll({
+                    where: {
+                        uuid: items
+                    },
+                    raw: true
+                })
+                const products = await models.Product.findAll({
+                    where: {
+                        id: catalog_products.map((item) => item.product_id)
+                    },
+                    raw: true
+                })
+                let total_price = 0;
+                products.map((product) => {
+                    total_price += product.price
+                })
+
+                models.User.findOne({
+                    where: {
+                        uuid: buyer_user_uuid,
+                        user_type: 'buyer'
+                    },
+                    raw: true
+                }).then(async (buyer) => {
+
+                    try {
+                        if (buyer) {
+                            console.log(buyer.id, seller_id, total_price)
+                            const order = await models.Order.create({
+                                buyer_id: buyer.id,
+                                seller_id: seller_id,
+                                price: total_price
+                            })
+                            products.forEach(async (item) => {
+                                await models.OrderItem.create({
+                                    order_id: order.id,
+                                    product_id: item.id
+                                })
+                            })
+                            res.send({ code: 200, message: 'Order created' });
+                        }
+                        else {
+                            res.send({ code: 400, message: 'Buyer not found' });
+                        }
+                    }
+                    catch (err) {
+                        res.send({ code: 500, message: err.message })
+                    }
+                })
+            }
+            else {
+                res.send({ code: 500, message: "Seller Does not exists" })
+            }
+
         }
         catch (err) {
             res.send({ code: 500, message: err.message })

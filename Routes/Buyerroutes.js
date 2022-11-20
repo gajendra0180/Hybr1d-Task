@@ -11,7 +11,7 @@ router.get('/seller-catalog/:seller_id', async (req, res) => {
 })
 
 router.post('/create-order/:seller_id', async (req, res) => {
-    BuyerControllers.Register(req, res);
+    BuyerControllers.createOrder(req, res);
 })
 
 

@@ -10,4 +10,8 @@ router.post('/create-catalog', async (req, res) => {
     SellerControllers.createCatalog(req, res);
 })
 
+router.post('/add-product', async (req, res) => {
+    return SellerControllers.addProduct(req, res);
+})
+
 module.exports = router;
