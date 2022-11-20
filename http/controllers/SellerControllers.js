@@ -7,18 +7,22 @@ module.exports = {
             const allOrders = await models.Order.findAll({
                 raw: true
             })
+            console.log(allOrders)
             for (let i = 0; i < allOrders.length; i++) {
                 const buyer = await models.User.findOne({
                     where: {
                         id: allOrders[i].buyer_id
                     },
+                    attributes:['user_type','username'],
                     raw: true
                 })
-                orders[i].buyer = buyer;
+                console.log(buyer)
+                orders.push({buyer:buyer})
                 const seller = await models.User.findOne({
                     where: {
                         id: allOrders[i].seller_id
                     },
+                    attributes:['user_type','username'],
                     raw: true
                 })
                 orders[i].seller = seller;
@@ -36,6 +40,7 @@ module.exports = {
                 })
                 orders[i].products = Products;
             }
+            res.send({ code: 200, message: 'Orders', data: orders })
         }
         catch (err) {
             res.send({ code: 500, message: err.message })
