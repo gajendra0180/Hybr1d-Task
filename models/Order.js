@@ -14,11 +14,11 @@ class Order extends BaseModel {
                     defaultValue: DataTypes.UUIDV4,
                 },
                 buyer_id: {
-                    type: DataTypes.TEXT,
+                    type: DataTypes.INTEGER,
                     defaultValue: null,
                 },
                 seller_id: {
-                    type: DataTypes.DOUBLE,
+                    type: DataTypes.INTEGER,
                     defaultValue: null,
                 },
                 price: {
@@ -27,8 +27,8 @@ class Order extends BaseModel {
                 }
             },
             {
-                modelName: "OrderItem",
-                tableName: "order_item",
+                modelName: "Order",
+                tableName: "orders",
                 underscored: true,
                 sequelize,
             }

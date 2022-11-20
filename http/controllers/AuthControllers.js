@@ -1,3 +1,7 @@
+const models = require('../../models')
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken')
+
 module.exports = {
     async Register(req, res) {
         try {
@@ -10,7 +14,7 @@ module.exports = {
             })
             if (isPresent)
                 res.send({ code: 400, message: 'User already exists' });
-
+            
             bcrypt.hash(req.body.password, 10, async function (err, hash) {
                 if (err) throw err;
                 const createUser = await models.User.create({
@@ -25,7 +29,7 @@ module.exports = {
             res.send({ code: 500, message: err.message })
         }
     },
-   async Login(req, res) {
+    async Login(req, res) {
         try {
             const isPresent = await models.User.findOne({
                 where: {
