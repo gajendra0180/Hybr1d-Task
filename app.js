@@ -1,18 +1,13 @@
 const express = require('express');
 const dotenv = require('dotenv')
-const path = require('path')
 const models = require('./models')
-const middlewares = require('./http/middlewares');
 const bodyParser = require('body-parser')
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt');
-const { Product } = require('./models');
-const Order = require('./models/Order');
 const AuthRoutes = require('./Routes/AuthRoutes.js');
 const BuyerRoutes = require('./Routes/BuyerRoutes.js');
 const SellerRoutes = require('./Routes/SellerRoutes.js');
 dotenv.config({ path: '.env' });
 const app = express()
+const authMiddleWare = require('./http/middlewares/auth');
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
@@ -40,6 +35,9 @@ app.use((req, res, next) => {
     }
     next();
 });
+
+// application level middleware
+app.use(authMiddleWare.AuthMiddleware);
 
 app.use("/api/auth", AuthRoutes);
 app.use("/api/buyer", BuyerRoutes);
